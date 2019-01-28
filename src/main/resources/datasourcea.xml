@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans-4.1.xsd
+	http://www.springframework.org/schema/tx 
+	http://www.springframework.org/schema/tx/spring-tx-4.1.xsd
+	http://www.springframework.org/schema/aop
+	http://www.springframework.org/schema/aop/spring-aop-4.1.xsd
+	http://www.springframework.org/schema/context 
+    http://www.springframework.org/schema/context/spring-context-4.1.xsd"
+       default-lazy-init="true">
+
+
+    <!-- druid xa datasource -->
+    <bean id="aDruidXA" class="com.alibaba.druid.pool.xa.DruidXADataSource"
+          init-method="init" destroy-method="close">
+        <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+        <property name="url">
+            <value>
+                jdbc:mysql://127.0.0.1:3306/test1?useUnicode=true&amp;characterEncoding=utf-8
+            </value>
+        </property>
+        <property name="username" value="root"/>
+        <property name="password" value="root"/>
+        <property name="filters" value="stat"/>
+        <property name="maxActive" value="100"/>
+        <property name="initialSize" value="10"/>
+        <property name="maxWait" value="60000"/>
+        <property name="minIdle" value="10"/>
+        <property name="timeBetweenEvictionRunsMillis" value="60000"/>
+        <property name="minEvictableIdleTimeMillis" value="300000"/>
+        <property name="validationQuery" value="SELECT 'x'"/>
+        <property name="testWhileIdle" value="true"/>
+        <property name="testOnBorrow" value="false"/>
+        <property name="testOnReturn" value="false"/>
+        <property name="poolPreparedStatements" value="true"/>
+        <property name="maxPoolPreparedStatementPerConnectionSize" value="50"/>
+        <property name="maxOpenPreparedStatements" value="100"/>
+    </bean>
+
+    <!-- datasource1数据源 -->
+    <bean id="dataSource1" class="com.atomikos.jdbc.AtomikosDataSourceBean"
+          init-method="init" destroy-method="close">
+        <property name="uniqueResourceName" value="dataSource1"/>
+        <property name="xaDataSource" ref="aDruidXA"/>
+        <!-- NOTE: 注意不要添加以下注释的参数 -->
+        <!--<property name="poolSize" value="10"/>-->
+        <!--<property name="minPoolSize" value="10"/>-->
+        <property name="maxPoolSize" value="100"/>
+        <property name="borrowConnectionTimeout" value="30"/>
+        <property name="testQuery" value="select 1"/>
+        <property name="maintenanceInterval" value="60"/>
+    </bean>
+
+    <!-- sessionFactory 将spring和mybatis整合 -->
+    <bean id="sqlSessionFactory1" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource1"/>
+        <property name="mapperLocations">
+            <array>
+                <value>classpath*:com/study/mappera/**/*.xml</value>
+            </array>
+        </property>
+    </bean>
+
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.study.daoa"/>
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory1"/>
+    </bean>
+
+</beans>

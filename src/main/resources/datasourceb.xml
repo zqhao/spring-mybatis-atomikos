@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans-4.1.xsd
+	http://www.springframework.org/schema/tx 
+	http://www.springframework.org/schema/tx/spring-tx-4.1.xsd
+	http://www.springframework.org/schema/aop
+	http://www.springframework.org/schema/aop/spring-aop-4.1.xsd
+	http://www.springframework.org/schema/context 
+    http://www.springframework.org/schema/context/spring-context-4.1.xsd"
+       default-lazy-init="true">
+
+    <!-- datasource2数据源 -->
+    <bean id="dataSource2" class="com.atomikos.jdbc.AtomikosDataSourceBean"
+          init-method="init" destroy-method="close">
+        <property name="uniqueResourceName" value="dataSource2"/>
+        <property name="xaDataSourceClassName" value="com.mysql.jdbc.jdbc2.optional.MysqlXADataSource"/>
+        <!-- NOTE: 对于Druid的XA数据源的另一种配置方法 -->
+        <!-- <property name="xaDataSourceClassName" value="com.alibaba.druid.pool.xa.DruidXADataSource"/> -->
+        <property name="xaProperties">
+            <props>
+                <prop key="url">
+                    jdbc:mysql://127.0.0.1:3306/test2?useUnicode=true&amp;characterEncoding=utf-8
+                </prop>
+                <prop key="user">root</prop>
+                <prop key="password">root</prop>
+            </props>
+        </property>
+        <property name="poolSize" value="10"/>
+        <property name="minPoolSize" value="10"/>
+        <property name="maxPoolSize" value="100"/>
+        <property name="borrowConnectionTimeout" value="30"/>
+        <property name="testQuery" value="select 1"/>
+        <property name="maintenanceInterval" value="60"/>
+    </bean>
+
+    <bean id="sqlSessionFactory2" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource2"/>
+        <property name="mapperLocations">
+            <array>
+                <value>classpath*:com/study/mapperb/**/*.xml</value>
+            </array>
+        </property>
+    </bean>
+
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.study.daob"/>
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory2"/>
+    </bean>
+
+</beans>
